@@ -27,10 +27,11 @@ const app = express()
 // ---------------------------------------------------------------------------
 
 const allowedOrigins = new Set([
-  'http://localhost:5173',        // Vite default
-  'http://localhost:5174',        // Vite fallback when 5173 is busy
-  'http://localhost:3000',        // fallback CRA / next
-  process.env.FRONTEND_URL,       // set in .env for production
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  'https://1fi-emi-store-three.vercel.app',
+  process.env.FRONTEND_URL,
 ].filter(Boolean))
 
 app.use(cors({
