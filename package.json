@@ -1,0 +1,22 @@
+{
+  "name": "1fi-emi-store",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "1Fi EMI Store — SDE1 full-stack assignment",
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "install:all": "npm install --prefix frontend && npm install --prefix backend"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "node prisma/seed.js"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3"
+  }
+}

@@ -1,0 +1,148 @@
+// =============================================================================
+// Prisma Schema — 1Fi EMI Store
+//
+// Database: PostgreSQL
+// ORM:      Prisma 6
+//
+// Run from the backend/ directory:
+//   npm run db:generate   →  prisma generate
+//   npm run db:migrate    →  prisma migrate dev --name <migration-name>
+//   npm run db:seed       →  node ../prisma/seed.js
+//   npm run db:studio     →  prisma studio
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  // Output to backend node_modules so Express can import it directly.
+  output   = "../backend/node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// Product
+//
+// One row = one product SKU (e.g. "iPhone 17 Pro").
+//
+// Required fields (Step 2 spec):
+//   id, name, slug, description, mrp, price, createdAt, updatedAt
+//
+// Additional fields kept for UI and filtering:
+//   brand    — e.g. "Apple" — used by the brand-filter chips on the home page
+//   category — e.g. "Smartphones" — reserved for future category filtering
+//
+// slug is UNIQUE: each product has a distinct, human-readable URL key.
+//   e.g. "iphone-17-pro" → /products/iphone-17-pro
+//
+// mrp   — Maximum Retail Price: the strike-through price shown to the user.
+// price — Selling / offer price: the actual amount the user pays.
+// Both stored as DECIMAL(10,2) to avoid floating-point rounding errors.
+// =============================================================================
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique           // Unique URL key, e.g. "iphone-17-pro"
+  description String?                    // Optional marketing copy
+  brand       String?                    // e.g. "Apple", "Samsung"
+  category    String?                    // e.g. "Smartphones"
+  mrp         Decimal  @db.Decimal(10, 2) // Maximum Retail Price
+  price       Decimal  @db.Decimal(10, 2) // Selling / offer price
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // ── Relations ──────────────────────────────────────────────────────────────
+  variants ProductVariant[]
+  emiPlans EmiPlan[]
+
+  // ── Indexes ────────────────────────────────────────────────────────────────
+  // slug already has a unique index — adding a plain index for range scans too.
+  @@index([slug])
+  @@index([brand])
+  @@index([category])
+}
+
+// =============================================================================
+// ProductVariant
+//
+// A specific configuration of a Product defined by storage and colour.
+// e.g. iPhone 17 Pro → 256 GB → Natural Titanium
+//
+// Required fields (Step 2 spec):
+//   id, productId, storage, color, imageUrl, createdAt
+//
+// Additional fields kept for UI correctness:
+//   inStock   — hides out-of-stock variants from selection
+//   sortOrder — controls the display order of variants within a product
+//
+// productId is a FOREIGN KEY → Product.id with CASCADE DELETE.
+// Deleting a Product automatically deletes all its variants.
+// =============================================================================
+
+model ProductVariant {
+  id        String   @id @default(cuid())
+  productId String                        // FK → Product.id
+  storage   String                        // e.g. "128 GB", "256 GB", "1 TB"
+  color     String                        // e.g. "Natural Titanium", "Obsidian"
+  imageUrl  String?                       // Variant-specific product image URL
+  inStock   Boolean  @default(true)       // Stock status
+  sortOrder Int      @default(0)          // Display order within the product
+  createdAt DateTime @default(now())
+
+  // ── Relation ───────────────────────────────────────────────────────────────
+  // onDelete: Cascade — if the parent Product is deleted, all its variants go too.
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // ── Indexes ────────────────────────────────────────────────────────────────
+  @@index([productId])                    // Fast join: product → variants
+  @@index([productId, sortOrder])         // Sorted variant list per product
+}
+
+// =============================================================================
+// EmiPlan
+//
+// A mutual-fund-backed EMI option for a product.
+// Each product has multiple plans (e.g. 3 / 6 / 9 / 12 / 18 / 24 months).
+//
+// Required fields (Step 2 spec):
+//   id, productId, tenureMonths, monthlyPayment, interestRate, cashback, createdAt
+//
+// Additional fields kept for UI and business logic:
+//   totalPayable — tenureMonths × monthlyPayment; pre-computed to avoid
+//                  repeated client-side multiplication
+//   fundName     — name of the mutual fund backing this plan
+//   fundCategory — e.g. "Large Cap", "Mid Cap", "Index Fund"
+//   isNoCost     — convenience boolean; true when interestRate = 0.00
+//
+// interestRate   — Annual rate in %. 0.00 = no-cost EMI.
+//                  Stored as DECIMAL(5,2): supports values like 0.00–999.99%.
+// monthlyPayment — Fixed monthly instalment. DECIMAL(10,2) for rupee precision.
+// cashback       — Optional instant cashback; nullable.
+//
+// productId is a FOREIGN KEY → Product.id with CASCADE DELETE.
+// =============================================================================
+
+model EmiPlan {
+  id             String   @id @default(cuid())
+  productId      String                         // FK → Product.id
+  tenureMonths   Int                            // Repayment period: 3,6,9,12,18,24
+  interestRate   Decimal  @db.Decimal(5, 2)    // Annual %; 0.00 = no-cost EMI
+  monthlyPayment Decimal  @db.Decimal(10, 2)   // Fixed monthly instalment
+  totalPayable   Decimal  @db.Decimal(10, 2)   // tenureMonths × monthlyPayment
+  cashback       Decimal? @db.Decimal(10, 2)   // Optional cashback (nullable)
+  fundName       String?                        // Backing mutual fund name
+  fundCategory   String?                        // Fund category
+  isNoCost       Boolean  @default(false)       // True when interestRate = 0
+  createdAt      DateTime @default(now())
+
+  // ── Relation ───────────────────────────────────────────────────────────────
+  // onDelete: Cascade — deleting a Product removes all its EMI plans.
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // ── Indexes ────────────────────────────────────────────────────────────────
+  @@index([productId])                    // Fast join: product → plans
+  @@index([productId, tenureMonths])      // Sorted plan list per product
+}

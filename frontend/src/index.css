@@ -1,0 +1,245 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   1Fi Design System — Global CSS
+   Tailwind v4: all custom values live here as CSS custom properties.
+   Components reference these via Tailwind's arbitrary-value syntax or
+   directly in inline styles where needed.
+───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Brand colours */
+  --color-navy-deep:  #0B1020;
+  --color-navy:       #111827;
+  --color-indigo:     #4F46E5;
+  --color-violet:     #7C3AED;
+  --color-emerald:    #10B981;
+  --color-mint-soft:  #ECFDF5;
+
+  /* Surface colours */
+  --color-bg:         #F8FAFC;
+  --color-white:      #FFFFFF;
+  --color-border:     #E2E8F0;
+
+  /* Text colours */
+  --color-text-primary:   #0F172A;
+  --color-text-secondary: #64748B;
+
+  /* Semantic */
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-error:   #DC2626;
+
+  /* Spacing rhythm */
+  --radius-card: 1rem;       /* 16px — main cards */
+  --radius-inner: 0.75rem;   /* 12px — badges, pills, inner elements */
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-card-hover: 0 4px 12px 0 rgb(0 0 0 / 0.08), 0 2px 4px -1px rgb(0 0 0 / 0.04);
+  --shadow-modal: 0 20px 60px -10px rgb(0 0 0 / 0.25);
+}
+
+/* ── Global resets ────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  overflow-x: hidden;
+  position: relative;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+/* ── Focus ring — consistent across the app ──────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid var(--color-indigo);
+  outline-offset: 2px;
+}
+
+/* ── Utility classes used by multiple components ─────────────────────────── */
+
+/* Card base */
+.fi-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.fi-card-hover {
+  transition: box-shadow 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+.fi-card-hover:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: #cbd5e1;
+}
+
+/* Primary button */
+.fi-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  background: var(--color-indigo);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-inner);
+  border: none;
+  cursor: pointer;
+  transition: background 150ms ease, transform 100ms ease, box-shadow 150ms ease;
+  text-decoration: none;
+}
+.fi-btn-primary:hover {
+  background: #4338ca;
+  box-shadow: 0 2px 8px rgb(79 70 229 / 0.35);
+}
+.fi-btn-primary:active {
+  transform: translateY(1px);
+}
+.fi-btn-primary:disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Secondary button */
+.fi-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  background: white;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-inner);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+  text-decoration: none;
+}
+.fi-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Success / emerald button */
+.fi-btn-success {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  background: var(--color-emerald);
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-inner);
+  border: none;
+  cursor: pointer;
+  transition: background 150ms ease, box-shadow 150ms ease;
+  text-decoration: none;
+}
+.fi-btn-success:hover {
+  background: #059669;
+  box-shadow: 0 2px 8px rgb(16 185 129 / 0.3);
+}
+
+/* Badge base */
+.fi-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.1875rem 0.5rem;
+  border-radius: 0.375rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Badge variants */
+.fi-badge-emerald {
+  background: var(--color-mint-soft);
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+.fi-badge-indigo {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}
+.fi-badge-amber {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+.fi-badge-violet {
+  background: #f5f3ff;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+}
+.fi-badge-gray {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+/* Section label — small caps eyebrow text */
+.fi-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Divider */
+.fi-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 1rem 0;
+}
+
+/* Number display — tabular figures */
+.fi-number {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* Smooth page transitions — respects prefers-reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+  .fi-fade-in {
+    animation: fadeIn 200ms ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
