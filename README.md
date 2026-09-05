@@ -709,11 +709,6 @@ FRONTEND_URL=https://your-frontend.example.com
 
 ---
 
-## Demo Video
-
-📹 **Demo Video:** [TO BE ADDED]
-
----
 
 ## Assignment
 
